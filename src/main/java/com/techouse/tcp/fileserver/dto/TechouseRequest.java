@@ -1,9 +1,12 @@
 package com.techouse.tcp.fileserver.dto;
 
-import com.techouse.tcp.fileserver.dto.trans.TechouseTransData;
-import com.techouse.tcp.fileserver.dto.trans.TechouseTransDataType;
+import java.util.Date;
 
-public class TechouseRequest<T> implements TechouseTransData {
+import com.alibaba.fastjson.JSON;
+import com.techouse.tcp.fileserver.dto.trans.TransTextData;
+import com.techouse.tcp.fileserver.vo.file_upload.FileUploadReqBody;
+
+public class TechouseRequest<T> extends TransTextData{
 	private TechouseRequestHeader req_h;
 	private T req_b;
 
@@ -31,9 +34,18 @@ public class TechouseRequest<T> implements TechouseTransData {
 	public void setReq_b(T req_b) {
 		this.req_b = req_b;
 	}
-
-	@Override
-	public TechouseTransDataType whatTransDataType() {
-		return TechouseTransDataType.JSON;
+	
+	
+	
+	public static void main(String[] args) {
+		TechouseRequestHeader reqHeader = new TechouseRequestHeader();
+		reqHeader.setFlow_time(new Date());
+		TechouseRequest<FileUploadReqBody> request = new TechouseRequest<FileUploadReqBody>(reqHeader);
+		FileUploadReqBody reqBody = new FileUploadReqBody();
+		reqBody.setDir_path("/222//333");
+		request.setReq_b(reqBody );
+		System.out.println(JSON.toJSONString(request));
 	}
+	
+	
 }

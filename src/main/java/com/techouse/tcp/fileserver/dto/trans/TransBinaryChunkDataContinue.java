@@ -1,5 +1,5 @@
 package com.techouse.tcp.fileserver.dto.trans;
-import static com.techouse.tcp.fileserver.dto.trans.TechouseTransData.*;
+
 /**
  *
 * Copyright: Copyright (c) 2018 www.techouse.top
@@ -17,7 +17,7 @@ import static com.techouse.tcp.fileserver.dto.trans.TechouseTransData.*;
 * 2018年8月19日       许宝众          			v1.0.0              	 首次添加
  */
 public class TransBinaryChunkDataContinue extends TransBinaryData{
-	public TransBinaryChunkDataContinue(byte[] data) {
-		super(CHUNK_TYPE_CONTIUNE, data);
+	public TransBinaryChunkDataContinue(TechouseTransDataType dataType,int chunkId,byte[] data) {
+		super(dataType,ChunkType.CHUNK_CONTINUE,chunkId,data);
 	}
 }

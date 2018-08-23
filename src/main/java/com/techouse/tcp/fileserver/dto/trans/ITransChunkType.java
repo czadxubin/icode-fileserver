@@ -1,6 +1,11 @@
 package com.techouse.tcp.fileserver.dto.trans;
 
-public interface TransChunkData{
+/**
+ * 传输分块接口
+ * @author xiaobao
+ *
+ */
+public interface ITransChunkType{
 	/**
 	 * 	是否为分块数据
 	 * @return

@@ -8,7 +8,6 @@ import com.techouse.tcp.fileserver.dto.trans.TechouseTransDataType;
 import com.techouse.tcp.fileserver.dto.trans.TransBinaryChunkDataContinue;
 import com.techouse.tcp.fileserver.dto.trans.TransBinaryChunkDataFirst;
 import com.techouse.tcp.fileserver.dto.trans.TransBinaryChunkDataLast;
-import com.techouse.tcp.fileserver.dto.trans.TransBinaryData;
 import com.techouse.tcp.fileserver.dto.trans.TransBinaryNoChunkData;
 import com.techouse.tcp.fileserver.dto.trans.TransData;
 
@@ -45,10 +44,10 @@ public class FileServerDataChunkDecoder extends MessageToMessageDecoder<TransDat
 	 * @param out
 	 */
 	private void doDecodeNoChunkedData(ChannelHandlerContext ctx, TransData msg, List<Object> out) {
-		if(msg.getDataType()==TechouseTransDataType.JSON) {
+		if(msg.getDataType()==TechouseTransDataType.TEXT_DATA) {
 			String JsonString = new String(msg.getData(),CharsetUtil.UTF_8);
 			out.add(JsonString);
-		}else if(msg.getDataType()==TechouseTransDataType.BINARY) {
+		}else if(msg.getDataType()==TechouseTransDataType.BINARY_FILE_DATA) {
 			out.add(new TransBinaryNoChunkData(msg.getData()));
 		}
 	}
@@ -62,14 +61,14 @@ public class FileServerDataChunkDecoder extends MessageToMessageDecoder<TransDat
 	 * @param out
 	 */
 	private void doDecodeChunkedData(ChannelHandlerContext ctx, TransData msg, List<Object> out) {
-		if(msg.getDataType()==TechouseTransDataType.JSON) {//json文本分块
+		if(msg.getDataType()==TechouseTransDataType.TEXT_DATA) {//文本分块
 			buf = ArrayUtils.addAll(buf, msg.getData());
 			if(msg.isLast()){
 				String JsonString = new String(buf,CharsetUtil.UTF_8);
 				out.add(JsonString);
 				buf = null;
 			}
-		}else if(msg.getDataType()==TechouseTransDataType.BINARY) {//数据分块
+		}else if(msg.getDataType()==TechouseTransDataType.BINARY_FILE_DATA) {//数据分块
 			TransBinaryData transBinaryData = null;
 			if(msg.isFirst()) {
 				transBinaryData = new TransBinaryChunkDataFirst(msg.getData());

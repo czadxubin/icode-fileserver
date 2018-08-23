@@ -16,11 +16,15 @@ package com.techouse.tcp.fileserver.dto.trans;
 *---------------------------------------------------------*
 * 2018年8月19日       许宝众          			v1.0.0              	 首次添加
  */
-public interface TechouseTransData {
-	/**数据字段类型：文本JSON**/
-	public final short DATA_TYPE_JSON = 0;
-	/**数据字段类型：数据**/
-	public final short DATA_TYPE_BINARY = 1;
+public interface ITechouseTransData{
+	/**数据字段类型：文本JSON数据类型**/
+	public final byte TEXT_DATA_TYPE = 127;
+	/**数据字段类型：文本数据类型**/
+	public final byte TEXT_JSON_DATA_TYPE = 0;
+	/**数据字段类型：二进制文件数据类型**/
+	public final byte BINARY_DATA_TYPE = -128;
+	/**数据字段类型：二进制文件数据类型**/
+	public final byte BINARY_FILE_DATA_TYPE = -1;
 	
 	/**分块类型：-1：无分块**/
 	public final byte CHUNK_TYPE_NO_CHUNKED = -1;
@@ -40,5 +44,4 @@ public interface TechouseTransData {
 	/**数据分块大小**/
 	public final int CHUNKED_SIZE = 8*1024;
 	
-	public TechouseTransDataType whatTransDataType();
 }

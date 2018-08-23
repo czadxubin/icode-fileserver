@@ -3,6 +3,8 @@ package com.techouse.tcp.fileserver.utils;
 import java.math.BigInteger;
 
 public class CRCUtils {
+	
+	
 	/**
      * 计算CRC16校验码
      *

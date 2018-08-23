@@ -1,6 +1,6 @@
 package com.techouse.tcp.fileserver.test.handler;
 
-import static com.techouse.tcp.fileserver.dto.trans.TechouseTransData.CHUNKED_SIZE;
+import static com.techouse.tcp.fileserver.dto.trans.ITechouseTransData.CHUNKED_SIZE;
 
 import java.io.File;
 import java.io.FileInputStream;

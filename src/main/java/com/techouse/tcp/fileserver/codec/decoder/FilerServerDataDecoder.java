@@ -29,10 +29,10 @@ public class FilerServerDataDecoder extends ByteToMessageDecoder {
 		//读取数据类型字段>2
 		if(nextRead == NEXT_READ_DATA_TYPE && in.readableBytes()>=2) {
 			short s = in.readShort();
-			if(s==TechouseTransDataType.JSON.value) {
-				dataType = TechouseTransDataType.JSON;
-			}else if(s==TechouseTransDataType.BINARY.value) {
-				dataType = TechouseTransDataType.BINARY;
+			if(s==TechouseTransDataType.TEXT_DATA.value) {
+				dataType = TechouseTransDataType.TEXT_DATA;
+			}else if(s==TechouseTransDataType.BINARY_FILE_DATA.value) {
+				dataType = TechouseTransDataType.BINARY_FILE_DATA;
 			}
 			nextRead = NEXT_READ_CHUNK_TYPE;
 			return ;

@@ -16,8 +16,9 @@ package com.techouse.tcp.fileserver.dto.trans;
 *---------------------------------------------------------*
 * 2018年8月19日       许宝众          			v1.0.0              	 首次添加
  */
-public class TransBinaryChunkDataFirst extends TransBinaryData{
-	public TransBinaryChunkDataFirst(TechouseTransDataType dataType,byte[] data) {
-		super(dataType,ChunkType.CHUNK_FIRST,1,data);
+public class TransBinaryFileData implements ITechouseTransData,ITransDataType{
+	@Override
+	public TechouseTransDataType whatTransDataType() {
+		return TechouseTransDataType.BINARY_FILE_DATA;
 	}
 }
