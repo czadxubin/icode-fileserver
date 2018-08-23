@@ -10,6 +10,12 @@ import org.apache.commons.lang3.ArrayUtils;
 import com.alibaba.fastjson.JSON;
 import com.techouse.tcp.fileserver.dto.trans.TechouseTransData;
 import com.techouse.tcp.fileserver.dto.trans.TechouseTransDataType;
+import com.techouse.tcp.fileserver.dto.trans.TransBinaryChunkDataContinue;
+import com.techouse.tcp.fileserver.dto.trans.TransBinaryChunkDataFirst;
+import com.techouse.tcp.fileserver.dto.trans.TransBinaryChunkDataLast;
+import com.techouse.tcp.fileserver.dto.trans.TransBinaryData;
+import com.techouse.tcp.fileserver.dto.trans.TransBinaryNoChunkData;
+import com.techouse.tcp.fileserver.dto.trans.TransData;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -18,13 +24,14 @@ import io.netty.util.CharsetUtil;
 public class FilerServerDataEncoder extends MessageToByteEncoder<TechouseTransData> {
 	@Override
 	protected void encode(ChannelHandlerContext ctx, TechouseTransData msg, ByteBuf out) throws Exception {
-		TechouseTransDataType dataType = msg.getTransDataType();
+		TechouseTransData tranData = (TechouseTransData) msg;
+		TechouseTransDataType dataType = tranData.whatTransDataType();
 		switch (dataType) {
 		case JSON:
-			doEncodeJsonData(ctx,msg,out);
+			doEncodeJsonData(ctx,tranData,out);
 			break;
 		case BINARY:
-			doEncodeBinaryData(ctx,msg,out);
+			doEncodeBinaryData(ctx,tranData,out);
 			break;
 		default:
 			break;
@@ -37,7 +44,20 @@ public class FilerServerDataEncoder extends MessageToByteEncoder<TechouseTransDa
 	 * @param out
 	 */
 	private void doEncodeBinaryData(ChannelHandlerContext ctx, TechouseTransData msg, ByteBuf out) {
-		
+		if(msg instanceof TransBinaryData) {
+			TransBinaryData binaryData=(TransBinaryData)msg;
+			byte[] data = binaryData.getData();
+			short dataType = DATA_TYPE_BINARY;
+			byte chunkType = CHUNK_TYPE_NO_CHUNKED;
+			if(msg instanceof TransBinaryChunkDataFirst) {
+				chunkType = CHUNK_TYPE_START;
+			}else if(msg instanceof TransBinaryChunkDataContinue) {
+				chunkType = CHUNK_TYPE_CONTIUNE;
+			}else if(msg instanceof TransBinaryChunkDataLast) {
+				chunkType = CHUNK_TYPE_END;
+			}
+			writeFullData(out, data, dataType, chunkType);
+		}
 	}
 	/**
 	 * 编码JSON文本数据
@@ -49,10 +69,18 @@ public class FilerServerDataEncoder extends MessageToByteEncoder<TechouseTransDa
 		String jsonString = JSON.toJSONString(msg);
 		System.out.println("encode text length :" + jsonString.length() );
 		byte[] dataBytes = jsonString.getBytes(CharsetUtil.UTF_8);
-		int textLength = dataBytes.length;
+		writeEncodeData(out, dataBytes);
+	}
+	/**
+	 * 写出数据到socket
+	 * @param out
+	 * @param data
+	 */
+	private void writeEncodeData(ByteBuf out, byte[] data) {
+		int textLength = data.length;
 		//文本内容长度<=分块长度
 		if(textLength<=CHUNKED_SIZE) {
-			writeFullData(out, dataBytes, DATA_TYPE_JSON, CHUNK_TYPE_NO_CHUNKED);
+			writeFullData(out, data, DATA_TYPE_JSON, CHUNK_TYPE_NO_CHUNKED);
 		}else {
 			//需要分块写出
 			int chunkedCount = textLength / CHUNKED_SIZE;
@@ -70,12 +98,12 @@ public class FilerServerDataEncoder extends MessageToByteEncoder<TechouseTransDa
 				}else {
 					chunkedType = CHUNK_TYPE_START;
 				}
-				writeChunkData(out,dataBytes,start,end,DATA_TYPE_JSON, chunkedType);
+				writeChunkData(out,data,start,end,DATA_TYPE_JSON, chunkedType);
 			}
 			//写出最后一段数据块
 			int start = (chunkedCount-1)*CHUNKED_SIZE;
 			int end = textLength;
-			writeChunkData(out,dataBytes,start,end,DATA_TYPE_JSON, CHUNK_TYPE_END);
+			writeChunkData(out,data,start,end,DATA_TYPE_JSON, CHUNK_TYPE_END);
 		}
 	}
 	/**
@@ -127,10 +155,6 @@ public class FilerServerDataEncoder extends MessageToByteEncoder<TechouseTransDa
 		}
 	}
 	
-	@Override
-	public boolean acceptOutboundMessage(Object msg) throws Exception {
-		return super.acceptOutboundMessage(msg);
-	}
 	@Override
 	public void flush(ChannelHandlerContext ctx) throws Exception {
 		super.flush(ctx);

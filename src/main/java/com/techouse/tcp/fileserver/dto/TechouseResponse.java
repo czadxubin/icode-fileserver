@@ -4,13 +4,13 @@ import com.techouse.tcp.fileserver.dto.trans.TechouseTransData;
 import com.techouse.tcp.fileserver.dto.trans.TechouseTransDataType;
 
 public class TechouseResponse<T> implements TechouseTransData{
-	private TechouseResponseHeader res_q;
+	private TechouseResponseHeader res_h;
 	private T res_b;
-	public TechouseResponseHeader getRes_q() {
-		return res_q;
+	public TechouseResponseHeader getRes_h() {
+		return res_h;
 	}
-	public void setRes_q(TechouseResponseHeader res_q) {
-		this.res_q = res_q;
+	public void setRes_h(TechouseResponseHeader res_h) {
+		this.res_h = res_h;
 	}
 	public T getRes_b() {
 		return res_b;
@@ -18,8 +18,9 @@ public class TechouseResponse<T> implements TechouseTransData{
 	public void setRes_b(T res_b) {
 		this.res_b = res_b;
 	}
+
 	@Override
-	public TechouseTransDataType getTransDataType() {
-		return TechouseTransDataType.BINARY;
+	public TechouseTransDataType whatTransDataType() {
+		return TechouseTransDataType.JSON;
 	}
 }

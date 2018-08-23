@@ -40,5 +40,5 @@ public interface TechouseTransData {
 	/**数据分块大小**/
 	public final int CHUNKED_SIZE = 8*1024;
 	
-	public TechouseTransDataType getTransDataType();
+	public TechouseTransDataType whatTransDataType();
 }

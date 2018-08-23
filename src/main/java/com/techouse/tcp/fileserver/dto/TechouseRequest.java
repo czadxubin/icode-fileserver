@@ -33,7 +33,7 @@ public class TechouseRequest<T> implements TechouseTransData {
 	}
 
 	@Override
-	public TechouseTransDataType getTransDataType() {
+	public TechouseTransDataType whatTransDataType() {
 		return TechouseTransDataType.JSON;
 	}
 }
