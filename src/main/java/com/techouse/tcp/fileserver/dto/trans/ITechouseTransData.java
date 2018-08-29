@@ -6,7 +6,7 @@ package com.techouse.tcp.fileserver.dto.trans;
 * 
 * @ClassName: TechouseTransData.java
 * @Description: 
-*				基础传输数据
+*				基础的数据传输接口类
 * @version: v1.0.0
 * @author: 许宝众
 * @date: 2018年8月19日 下午3:30:55 
@@ -16,7 +16,7 @@ package com.techouse.tcp.fileserver.dto.trans;
 *---------------------------------------------------------*
 * 2018年8月19日       许宝众          			v1.0.0              	 首次添加
  */
-public interface ITechouseTransData{
+public interface ITechouseTransData extends ITransDataType{
 	/**数据字段类型：文本JSON数据类型**/
 	public final byte TEXT_DATA_TYPE = 127;
 	/**数据字段类型：文本数据类型**/

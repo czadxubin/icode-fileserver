@@ -2,6 +2,8 @@ package com.techouse.tcp.fileserver.dto.trans;
 
 public enum FlagType {
 	/**确认应答**/
+	SEND((byte)-1),
+	/**确认应答**/
 	ACK((byte)0),
 	/**否定应答，用于重传**/
 	NAK((byte)1),

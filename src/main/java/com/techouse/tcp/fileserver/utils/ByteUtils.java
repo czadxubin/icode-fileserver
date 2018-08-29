@@ -59,12 +59,12 @@ public class ByteUtils {
    * @return 整形数据的字节数组。
    */
   public static byte[] intToByte(int number) {
-    byte[] b = new byte[4];
-    for (int i = 3; i >= 0; i--) {
-      b[i] = (byte) (number % 256);
-      number >>= 8;
-    }
-    return b;
+	  return new byte[] {   
+		        (byte) ((number >> 24) & 0xFF),   
+		        (byte) ((number >> 16) & 0xFF),      
+		        (byte) ((number >> 8) & 0xFF),      
+		        (byte) (number & 0xFF)   
+		    };   
   }
  
   /**

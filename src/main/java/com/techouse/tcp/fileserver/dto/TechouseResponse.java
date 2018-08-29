@@ -1,8 +1,10 @@
 package com.techouse.tcp.fileserver.dto;
 
-import com.techouse.tcp.fileserver.dto.trans.TransTextData;
+import com.techouse.tcp.fileserver.dto.trans.ITechouseTransData;
+import com.techouse.tcp.fileserver.dto.trans.ITransDataType;
+import com.techouse.tcp.fileserver.dto.trans.TechouseTransDataType;
 
-public class TechouseResponse<T> extends TransTextData{
+public class TechouseResponse<T>  implements ITechouseTransData{
 	private TechouseResponseHeader res_h;
 	private T res_b;
 	public TechouseResponseHeader getRes_h() {
@@ -16,5 +18,9 @@ public class TechouseResponse<T> extends TransTextData{
 	}
 	public void setRes_b(T res_b) {
 		this.res_b = res_b;
+	}
+	@Override
+	public TechouseTransDataType whatTransDataType() {
+		return TechouseTransDataType.TEXT_JSON_DATA;
 	}
 }

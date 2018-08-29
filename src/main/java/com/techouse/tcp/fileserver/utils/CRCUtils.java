@@ -3,18 +3,9 @@ package com.techouse.tcp.fileserver.utils;
 import java.math.BigInteger;
 
 public class CRCUtils {
-	
-	
-	/**
-     * 计算CRC16校验码
-     *
-     * @param bytes 字节数组
-     * @return {@link String} 校验码
-     * @since 1.0
-     */
-    public static byte[] getCRCBytes(byte[] bytes) {
-        int CRC = 0x0000ffff;
-        int POLYNOMIAL = 0x0000a001;
+	public static short getCRCShort(byte[] bytes) {
+		int CRC = 0x0000ffff;
+		int POLYNOMIAL = 0x0000a001;
         int i, j;
         for (i = 0; i < bytes.length; i++) {
             CRC ^= ((int) bytes[i] & 0x000000ff);
@@ -27,7 +18,18 @@ public class CRCUtils {
                 }
             }
         }
-        return intToBytes(CRC);
+        return (short)CRC;
+	}
+	
+	/**
+     * 计算CRC16校验码
+     *
+     * @param bytes 字节数组
+     * @return {@link String} 校验码
+     * @since 1.0
+     */
+    public static byte[] getCRCBytes(byte[] bytes) {
+        return ByteUtils.shortToByte((short)getCRCShort(bytes));
     }
 
     public static byte[] intToBytes(int a) {   

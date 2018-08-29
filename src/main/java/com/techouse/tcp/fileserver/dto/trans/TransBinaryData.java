@@ -3,7 +3,7 @@ package com.techouse.tcp.fileserver.dto.trans;
 import com.techouse.tcp.fileserver.utils.ByteUtils;
 import com.techouse.tcp.fileserver.utils.CRCUtils;
 
-public class TransBinaryData implements ITechouseTransData,ITransChunkType,ITransDataType{
+public class TransBinaryData implements ITechouseTransData,ITransChunkType{
 	/**数据长度，4字节**/
 	private int dataLength;
 	/**数据类型，1字节**/
@@ -18,20 +18,35 @@ public class TransBinaryData implements ITechouseTransData,ITransChunkType,ITran
 	private short crc;
 	/**数据**/
 	private byte[] data;
+	
+	/**
+	 * 根据指定参数创建一个传输对象
+	 * @param dataType
+	 * @param chunkType
+	 * @param chunkId
+	 * @param flagType
+	 * @param crc
+	 * @param data
+	 */
+	public TransBinaryData(TechouseTransDataType dataType, ChunkType chunkType, int chunkId, FlagType flagType,
+			short crc, byte[] data) {
+		this.dataType = dataType;
+		this.chunkType = chunkType;
+		this.chunkId = chunkId;
+		this.flagType = flagType;
+		this.crc = crc;
+		this.data = data;
+		this.dataLength = data!=null?data.length:0;
+	}
 	/**
 	 * 
-	 * @param dataLength
-	 * 			数据长度
-	 * @param dataType
-	 * 			数据类型
-	 * @param chunkType
-	 * 			分块标识
-	 * @param chunkId
-	 * 			块编号
 	 * @param data
-	 * 			数据
+	 * @param dataType
+	 * @param chunkType
+	 * @param chunkId
+	 * @param flagType
 	 */
-	protected TransBinaryData( TechouseTransDataType dataType, ChunkType chunkType, int chunkId,byte[] data) {
+	public TransBinaryData(byte[] data,TechouseTransDataType dataType, ChunkType chunkType, int chunkId,FlagType flagType) {
 		if(data!=null) {
 			this.dataLength = data.length;
 		}
@@ -42,7 +57,7 @@ public class TransBinaryData implements ITechouseTransData,ITransChunkType,ITran
 		}
 		this.data = data;
 		//计算crc
-		crc = this.caculateCrc();
+		crc = caculateCrc(data, dataType, chunkType, chunkId, flagType);
 		
 	}
 	
@@ -50,23 +65,27 @@ public class TransBinaryData implements ITechouseTransData,ITransChunkType,ITran
 	 * 参加校验的字段：长度标识4、类型标识1、块标识1、块序号4、标志位1、数据
 	 * @return
 	 */
-	private short caculateCrc() {
-		byte[] target = new byte[11+data.length];
+	public static short caculateCrc(byte[] data,TechouseTransDataType dataType,ChunkType chunkType,int chunkId,FlagType flagType) {
+		int dataLength = 0;
+		if(data!=null) {
+			dataLength = data.length;
+		}
+		byte[] target = new byte[11+dataLength];
 		//cp 数据长度 4
 		System.arraycopy(ByteUtils.intToByte(dataLength),0,target,0,4);
 		//cp 数据类型 1
 		target[4] = dataType.value;
 		//cp 块类型 1
-		target[6] = chunkType.value;
+		target[5] = chunkType.value;
 		//cp 块序号 4
-		System.arraycopy(ByteUtils.intToByte(this.chunkId),0,target,6,4);
+		System.arraycopy(ByteUtils.intToByte(chunkId),0,target,6,4);
 		//cp 标志位 1
 		target[10] = flagType.value;
 		//cp 数据长度
 		if(data!=null) {
 			System.arraycopy(data, 0, target, 11, data.length);
 		}
-		return ByteUtils.byteToShort(CRCUtils.getCRCBytes(target));
+		return CRCUtils.getCRCShort(target);
 		
 	}
 	/**
@@ -74,7 +93,7 @@ public class TransBinaryData implements ITechouseTransData,ITransChunkType,ITran
 	 * @return
 	 */
 	public boolean isValidData() {
-		return caculateCrc() == this.caculateCrc();
+		return this.crc == caculateCrc(data, dataType, chunkType, chunkId, flagType);
 	}
 	public int getDataLength() {
 		return dataLength;
@@ -131,6 +150,6 @@ public class TransBinaryData implements ITechouseTransData,ITransChunkType,ITran
 
 	@Override
 	public TechouseTransDataType whatTransDataType() {
-		return TechouseTransDataType.BINARY_FILE_DATA;
+		return this.dataType;
 	}
 }

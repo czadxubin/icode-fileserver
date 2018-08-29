@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry excluding="com/techouse/tcp/fileserver/handler/TechouseFileUploadServerHandlerBack.java" kind="src" output="target/classes" path="src/main/java">
+	<classpathentry excluding="com/techouse/tcp/fileserver/handler/TechouseFileUploadServerHandlerBack.java|com/techouse/tcp/fileserver/dto/trans/TransBinaryChunkDataContinue.java|com/techouse/tcp/fileserver/dto/trans/TransBinaryChunkDataFirst.java|com/techouse/tcp/fileserver/dto/trans/TransBinaryChunkDataLast.java|com/techouse/tcp/fileserver/dto/trans/TransBinaryNoChunkData.java|com/techouse/tcp/fileserver/dto/trans/TransJSONData.java|com/techouse/tcp/fileserver/FileClientUploadFileManager.java|com/techouse/tcp/fileserver/RecvFileTaskStatusListener.java|com/techouse/tcp/fileserver/RecvFileTask.java" kind="src" output="target/classes" path="src/main/java">
 		<attributes>
 			<attribute name="optional" value="true"/>
 			<attribute name="maven.pomderived" value="true"/>

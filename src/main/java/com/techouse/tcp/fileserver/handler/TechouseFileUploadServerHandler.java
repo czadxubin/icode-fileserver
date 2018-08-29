@@ -3,24 +3,24 @@ package com.techouse.tcp.fileserver.handler;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.Date;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.techouse.tcp.fileserver.RecvFileTask;
 import com.techouse.tcp.fileserver.dto.TechouseRequestHeader;
 import com.techouse.tcp.fileserver.dto.TechouseResponse;
-import com.techouse.tcp.fileserver.dto.trans.TransBinaryChunkDataContinue;
-import com.techouse.tcp.fileserver.dto.trans.TransBinaryChunkDataFirst;
-import com.techouse.tcp.fileserver.dto.trans.TransBinaryChunkDataLast;
 import com.techouse.tcp.fileserver.dto.trans.TransBinaryData;
-import com.techouse.tcp.fileserver.dto.trans.TransBinaryNoChunkData;
+import com.techouse.tcp.fileserver.event.FileRecvFinishedEvent;
 import com.techouse.tcp.fileserver.po.FileUploadRequestInfo;
 import com.techouse.tcp.fileserver.utils.CommonUtils;
 import com.techouse.tcp.fileserver.utils.ConstantsUtils;
 import com.techouse.tcp.fileserver.vo.client_auth.ClientAuthReqBody;
 import com.techouse.tcp.fileserver.vo.file_upload.FileUploadReqBody;
 import com.techouse.tcp.fileserver.vo.file_upload.FileUploadResBody;
+import com.techouse.tcp.fileserver.vo.server_notify.ServerNotifyEvent;
 
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -56,17 +56,18 @@ public class TechouseFileUploadServerHandler extends BaseFileServerHanlder<FileU
 	 * 处理文件流数据
 	 */
 	@Override
-	protected void doNotHandled(ChannelHandlerContext ctx, Object binaryData) {
-		if(binaryData instanceof TransBinaryData) {
+	protected void doNotHandled(ChannelHandlerContext ctx, Object msg) {
+		if(msg instanceof TransBinaryData) {
+			TransBinaryData binaryData = (TransBinaryData) msg;
 			try {
-				if(binaryData instanceof TransBinaryNoChunkData) {
-					handleNoChunkFileData(ctx,(TransBinaryNoChunkData)binaryData);
-				}else if(binaryData instanceof  TransBinaryChunkDataFirst) {
-					handleFirstChunkFileData(ctx,(TransBinaryChunkDataFirst)binaryData);
-				}else if(binaryData instanceof TransBinaryChunkDataContinue) {
-					handleContinueChunkFileData(ctx,(TransBinaryChunkDataContinue)binaryData);
-				}else if(binaryData instanceof TransBinaryChunkDataLast) {
-					handleLastChunkFileData(ctx,(TransBinaryChunkDataLast)binaryData);
+				if(!binaryData.isChunkedData()) {
+					handleNoChunkFileData(ctx,binaryData);
+				}else if(binaryData.isFirst()) {
+					handleFirstChunkFileData(ctx,binaryData);
+				}else if(binaryData.isContinue()) {
+					handleContinueChunkFileData(ctx,binaryData);
+				}else if(binaryData.isLast()) {
+					handleLastChunkFileData(ctx,binaryData);
 				}
 			}catch (Exception e) {
 				System.out.println("文件接收失败");
@@ -165,13 +166,31 @@ public class TechouseFileUploadServerHandler extends BaseFileServerHanlder<FileU
 			lockFile.delete();
 		}
 		//发送成功处理上传完成
-		
+		ServerNotifyEvent fileRecv = new ServerNotifyEvent(FileRecvFinishedEvent.class);
+		TechouseResponse<?> respone = CommonUtils.generateGenericReponse(UUID.randomUUID().toString(), ConstantsUtils.ReqTypeConstants.SERVER_NOTIFY_NO_REPLY, "1", "文件接收完成",fileRecv);
+		ctx.writeAndFlush(respone).addListener(new ChannelFutureListener() {
+			@Override
+			public void operationComplete(ChannelFuture future) throws Exception {
+				//发送关闭请求10s后主动关闭连接
+				if(future.isSuccess()) {
+					future.channel().eventLoop().schedule(new Runnable() {
+						@Override
+						public void run() {
+							Date finishedTime = new Date();
+							Date oneLineTime = future.channel().pipeline().channel().attr(ConstantsUtils.FileServerAttr.CLIENT_ONLINE_TIME).get();
+							System.out.println(finishedTime.getTime()-oneLineTime.getTime()+"ms");
+							future.channel().close();
+						}
+					}, 10, TimeUnit.SECONDS);
+				}
+			}
+		});
 	}
 	/**
 	 * 处理无分块数据传输
 	 * @param binaryData
 	 */
-	protected void handleNoChunkFileData(ChannelHandlerContext ctx,TransBinaryNoChunkData binaryData) throws Exception{
+	protected void handleNoChunkFileData(ChannelHandlerContext ctx,TransBinaryData binaryData) throws Exception{
 		writeFileData(binaryData.getData());
 		successFinished(ctx,binaryData);
 	}
@@ -180,14 +199,14 @@ public class TechouseFileUploadServerHandler extends BaseFileServerHanlder<FileU
 	 * 处理第一块分块数据
 	 * @param data
 	 */
-	protected void handleFirstChunkFileData(ChannelHandlerContext ctx,TransBinaryChunkDataFirst binaryData)throws Exception {
+	protected void handleFirstChunkFileData(ChannelHandlerContext ctx,TransBinaryData binaryData)throws Exception {
 		writeFileData(binaryData.getData());
 	}
 	/**
 	 * 处理中间分块数据
 	 * @param data
 	 */
-	protected void handleContinueChunkFileData(ChannelHandlerContext ctx,TransBinaryChunkDataContinue binaryData)throws Exception {
+	protected void handleContinueChunkFileData(ChannelHandlerContext ctx,TransBinaryData binaryData)throws Exception {
 		writeFileData(binaryData.getData());
 	}
 	
@@ -195,7 +214,7 @@ public class TechouseFileUploadServerHandler extends BaseFileServerHanlder<FileU
 	 * 处理最后一块数据传输
 	 * @param data
 	 */
-	protected void handleLastChunkFileData(ChannelHandlerContext ctx,TransBinaryChunkDataLast binaryData)throws Exception {
+	protected void handleLastChunkFileData(ChannelHandlerContext ctx,TransBinaryData binaryData)throws Exception {
 		writeFileData(binaryData.getData());
 		successFinished(ctx,binaryData);
 	}

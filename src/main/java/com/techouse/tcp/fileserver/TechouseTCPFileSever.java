@@ -4,7 +4,7 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 
 import com.techouse.tcp.fileserver.codec.TechouseFileServerCodec;
-import com.techouse.tcp.fileserver.codec.decoder.FileServerDataChunkDecoder;
+import com.techouse.tcp.fileserver.codec.decoder.FileServerTransBinaryDataDecoder;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -32,9 +32,9 @@ import io.netty.handler.timeout.IdleStateHandler;
  *        许宝众 v1.0.0 首次添加
  */
 public class TechouseTCPFileSever {
-	private static long readerIdleTime = 300;
-	private static long writerIdleTime = 300;
-	private static long allIdleTime = 300;
+	private static long readerIdleTime = 60;
+	private static long writerIdleTime = 60;
+	private static long allIdleTime = 60;
 
 	private static final String hostname = "0.0.0.0";
 	private static final int port = 8888;
@@ -55,7 +55,7 @@ public class TechouseTCPFileSever {
 					pipeline.addLast("idleStateHandler", new IdleStateHandler(false, readerIdleTime,
 							writerIdleTime, allIdleTime, TimeUnit.SECONDS));
 					pipeline.addLast("techouseFileServerCodec",new TechouseFileServerCodec());
-					pipeline.addLast("fileServerDataChunkDecoder",new FileServerDataChunkDecoder());
+					pipeline.addLast("fileServerTransBinaryDataDecoder",new FileServerTransBinaryDataDecoder());
 					pipeline.addLast("fileServerDispatcher",new FileServerDispatcher());
 				}
 
