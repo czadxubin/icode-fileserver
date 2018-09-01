@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -108,6 +109,10 @@ public class FileUploadController {
 								System.out.println("上传文件大小："+filePart.getSize()/1024+"KB,接收文件大小:"+recvfileSize/1024+"KB,耗时："+(endTime-startTime)+"ms");
 								resJson.put("resCode", "1");
 								resJson.put("resMsg", "上传成功");
+								String filePath = this.fileServerRootPath+"/"+dirPath+"/"+filename;
+								filePath = filePath.replaceAll("\\\\+", "/");
+								filePath = filePath.replaceAll("/+", "/");
+								resJson.put("filePath", filePath);
 							}else {
 								resJson.put("resMsg", "文件已存在");
 							}
@@ -154,5 +159,14 @@ public class FileUploadController {
 		}else{
 			resJson.put("resMsg", "创建目录失败");
 		}
+	}
+	@RequestMapping("/state")
+	public String state(HttpServletRequest request) {
+		String localAddr = request.getLocalAddr();
+		int localPort = request.getLocalPort();
+		JSONObject resJson = new JSONObject();
+		resJson.put("localAddr", localAddr);
+		resJson.put("localPort", localPort);
+		return resJson.toJSONString();
 	}
 }

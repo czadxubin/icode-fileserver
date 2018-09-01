@@ -3,11 +3,18 @@ fileserver:
     root: 
          path: "E:/"
 
+server:
+  address: 127.0.0.1
+  port: 8080
+  servlet:
+    path: /
 spring:
+  application:
+    name: boot-filserver 
   servlet:
     multipart:
       enabled: true #default true
-      location: "E:/tmp/"
+      #location: "E:/tmp/"
       maxFileSize: 200Mb
       maxRequestSize: 200Mb
       
