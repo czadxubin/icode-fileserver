@@ -1,0 +1,13 @@
+debug: true #Enable debug logs.
+fileserver: 
+    root: 
+         path: "E:/"
+
+spring:
+  servlet:
+    multipart:
+      enabled: true #default true
+      location: "E:/tmp/"
+      maxFileSize: 200Mb
+      maxRequestSize: 200Mb
+      
